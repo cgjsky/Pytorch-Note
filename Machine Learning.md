@@ -69,7 +69,7 @@ imp_mean=SimpleImputer(missing_values=np.nan,strategy='mean')
 imp_mean=imp_mean.fit_transform(age)
 ```
 
-## 
+
 
 ## 分类变量编码
 
@@ -129,7 +129,7 @@ num_X_train = X_train.drop(object_cols, axis=1)
 OH_X_train = pd.concat([num_X_train, OH_cols_train], axis=1)
 ```
 
-## 
+
 
 ## 交叉验证
 
@@ -147,4 +147,3 @@ cross_val_score(model_name,X,y，cv=k)
 
 
 
-## 
