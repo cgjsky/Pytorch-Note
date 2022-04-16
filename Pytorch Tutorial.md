@@ -11,6 +11,21 @@ print(os.listdir("../input"))
 
 在pytorch中，矩阵被叫做张量
 
+![image-20220401155036673](/Users/chenguanjin/Library/Application Support/typora-user-images/image-20220401155036673.png)
+
+```python
+#创建tensor
+import torch
+torch.Tensor(2,3)/torch.Tensor([1,2,3])#直接创建
+
+torch.ones_like(x)
+torch.ones(2,3)
+
+torch.from_numpy(x)
+```
+
+
+
 ```python
 # from numpy to tensor
 torch.from_numpy(): 从numpy到张量。
@@ -40,6 +55,8 @@ from torch.autograd import Variable
 var = Variable(torch.ones(3), requires_grad = True)
 ```
 
+![image-20220401160500585](/Users/chenguanjin/Library/Application Support/typora-user-images/image-20220401160500585.png)
+
 ## 实例
 
 ### Linear Regression
@@ -67,25 +84,24 @@ plt.show()
 
 ```python
 # Linear Regression with Pytorch
-import torch      
-from torch.autograd import Variable     
+import torch          
 import torch.nn as nn 
 import warnings
 warnings.filterwarnings("ignore")
+x_train = torch.randn(25,2)
+y_train = torch.randn(25,1)
 # create class
 class LinearRegression(nn.Module):
-  
     def __init__(self,input_size,output_size):
         super(LinearRegression,self).__init__()
-        # Linear function.
         self.linear = nn.Linear(input_dim,output_dim)
-
     def forward(self,x):
         return self.linear(x)
-# define model
-input_dim = 1
+
+#根据输入输出指定
+input_dim = 2
 output_dim = 1
-model = LinearRegression(input_dim,output_dim) # input and output size are 1
+model = LinearRegression(input_dim,output_dim) 
 
 # MSE
 mse = nn.MSELoss()
@@ -97,26 +113,15 @@ optimizer = torch.optim.SGD(model.parameters(),lr = learning_rate)
 # train model
 loss_list = []
 iteration_number = 1001
-for iteration in range(iteration_number):
-        
-    # optimization
+for iteration in range(iteration_number):    
+    outputs = model(x_train)
+    loss = mse(outputs, y_train)
+    #每一轮的累积梯度要清零
     optimizer.zero_grad() 
-    
-    # Forward to get output
-    results = model(car_price_tensor)
-    
-    # Calculate Loss
-    loss = mse(results, number_of_car_sell_tensor)
-    
-    # backward propagation
     loss.backward()
-    
-    # Updating parameters
     optimizer.step()
-    
     # store loss
     loss_list.append(loss.data)
-    
     # print loss
     if(iteration % 50 == 0):
         print('epoch {}, loss {}'.format(iteration, loss.data))
@@ -131,6 +136,72 @@ plt.show()
 
 - Linear regression is not good at classification
 - linear regression + logistic function(softmax) = logistic regression
+
+```python
+#LR
+import torch as torch
+import torch.nn as nn
+import numpy as np
+import matplotlib.pyplot as plt
+#超参数
+input_size=28*28
+num_classes = 10
+epochs=7
+learning_rate=0.02
+batch_size =20 
+# MNIST dataset (images and labels)
+train_dataset = torchvision.datasets.MNIST(root='input', 
+                                           train=True, 
+                                           transform=transforms.ToTensor(),
+                                           download=True)
+test_dataset = torchvision.datasets.MNIST(root='input', 
+                                          train=False, 
+                                          transform=transforms.ToTensor())
+
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset, 
+                                           batch_size=batch_size, 
+                                           shuffle=True)
+
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset, 
+                                          batch_size=batch_size, 
+                                          shuffle=False)
+
+model = nn.Linear(input_size, num_classes)
+criterion = nn.CrossEntropyLoss()  
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)  
+total_step = len(train_loader)
+for epoch in range(epochs):
+    for i, (images, labels) in enumerate(train_loader):
+        # Reshape images to (batch_size, input_size)
+        images = images.reshape(-1, input_size)
+        
+        # Forward pass
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        
+        # Backward and optimize
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        if (i+1) % 100 == 0:
+            print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}' 
+                   .format(epoch+1, epochs, i+1, total_step, loss.item()))
+
+with torch.no_grad():
+    correct = 0
+    total = 0
+    for images, labels in test_loader:
+        images = images.reshape(-1, input_size)
+        outputs = model(images)
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum()
+
+    print('Accuracy of the model on the 10000 test images: {} %'.format(100 * correct / total))
+```
+
+
 
 ### ANN
 
